@@ -1,5 +1,7 @@
 is_global = true
 build_property.TargetFramework = net8.0-windows
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v8.0
 build_property.TargetPlatformMinVersion = 7.0
 build_property.UsingMicrosoftNETSdkWeb = 
 build_property.ProjectTypeGuids = 
@@ -8,7 +10,7 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = RestaurantOrderApp
-build_property.ProjectDir = C:\Users\cosmi\OneDrive\Desktop\anul 2\Sem 2\MAP\RestaurantOrderApp\RestaurantOrderApp\
+build_property.ProjectDir = C:\Users\cosmi.COSMIN_LAPTOP\source\repos\cosminpelin21\RestaurantOrderApp\RestaurantOrderApp\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.CsWinRTUseWindowsUIXamlProjections = false

@@ -1,0 +1,121 @@
+﻿<Window x:Class="RestaurantOrderApp.Views.StaffProductsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RestaurantOrderApp.Views"
+        mc:Ignorable="d"
+        Title="Teatris - Product Management" WindowState="Maximized" Background="#121212">
+
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,20,0">
+            <TextBlock Text="MANAGE PRODUCTS" Foreground="#D4AF37" FontSize="24" Margin="0,0,0,20" FontFamily="Georgia"/>
+
+            <DataGrid ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}" 
+                      AutoGenerateColumns="False" Height="250" Background="#1A1A1A" Foreground="Black"
+                      IsReadOnly="True" BorderBrush="#33D4AF37" CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="Price" Binding="{Binding Price, StringFormat='{}{0:N2} LEI'}" Width="100"/>
+                    <DataGridTextColumn Header="Stock" Binding="{Binding TotalQuantity}" Width="80"/>
+                    <DataGridTextColumn Header="Category" Binding="{Binding Category.Name}" Width="120"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Background="#1A1A1A" Margin="0,20,0,0" Padding="20" BorderBrush="#33D4AF37" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="5">
+                        <TextBlock Text="PRODUCT NAME" Foreground="#666" FontSize="10"/>
+                        <TextBox Text="{Binding PName}" Background="#222" Foreground="White" BorderThickness="0" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="5">
+                        <TextBlock Text="CATEGORY" Foreground="#666" FontSize="10"/>
+                        <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding PCategory}" DisplayMemberPath="Name" Height="30"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+                        <TextBlock Text="PRICE (LEI)" Foreground="#666" FontSize="10"/>
+                        <TextBox Text="{Binding PPrice}" Background="#222" Foreground="White" BorderThickness="0" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+                        <TextBlock Text="QUANTITY (ex: 350g)" Foreground="#666" FontSize="10"/>
+                        <TextBox Text="{Binding PPortion}" Background="#222" Foreground="White" BorderThickness="0" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="5">
+                        <TextBlock Text="STOCK" Foreground="#666" FontSize="10" FontWeight="Bold"/>
+                        <TextBox Text="{Binding PStock}" Background="#222" Foreground="#4CAF50" BorderThickness="0" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="5">
+                        <TextBlock Text="INGREDIENTS" Foreground="#666" FontSize="10"/>
+                        <TextBox Text="{Binding PIngredients}" Background="#222" Foreground="White" BorderThickness="0" 
+                                 Height="60" TextWrapping="Wrap" AcceptsReturn="True" Padding="5" VerticalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+                        <Button Content="ADD MODE(clear fields)" Command="{Binding NewProductModeCommand}" Background="#555" Foreground="White" Padding="10,5" Margin="0,0,10,0" BorderThickness="0"/>
+                        <Button Content="DELETE" Command="{Binding DeleteProductCommand}" Background="#FF4C4C" Foreground="White" Padding="15,5" Margin="0,0,10,0" BorderThickness="0"/>
+                        <Button Content="SAVE" Command="{Binding SaveProductCommand}" Background="#D4AF37" Foreground="Black" FontWeight="Bold" Padding="20,5" BorderThickness="0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <StackPanel Grid.Row="0" Grid.Column="1">
+            <TextBlock Text="CATEGORIES" Foreground="#D4AF37" FontSize="24" Margin="0,0,0,20" FontFamily="Georgia"/>
+            <ListBox ItemsSource="{Binding Categories}" Height="300" Background="#1A1A1A" Foreground="White" BorderBrush="#33D4AF37" HorizontalContentAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" FontSize="14" TextWrapping="Wrap" Margin="0,0,10,0"/>
+                            <Button Grid.Column="1" Content="✕" 
+                                    Command="{Binding DataContext.DeleteCategoryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                                    CommandParameter="{Binding}" 
+                                    Background="Transparent" Foreground="#FF4C4C" BorderThickness="0" FontWeight="Bold" Width="30" Cursor="Hand"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <TextBlock Text="ADD NEW CATEGORY" Foreground="#666" FontSize="10" Margin="0,20,0,5"/>
+            <TextBox Text="{Binding NewCategoryName}" Background="#1A1A1A" Foreground="White" Height="35" BorderBrush="#33D4AF37" VerticalContentAlignment="Center" Padding="10,0"/>
+            <Button Content="ADD CATEGORY" Command="{Binding AddCategoryCommand}" Background="#D4AF37" Foreground="Black" FontWeight="Bold" Height="35" Margin="0,10,0,0" BorderThickness="0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,20,0,0">
+            <Button Content="BACK TO DASHBOARD" Click="Back_Click" Background="Transparent" Foreground="#666" BorderThickness="0" Cursor="Hand" Margin="0,0,30,0"/>
+            <Button Content="ORDER MANAGEMENT" Click="GoToOrders_Click" Background="#D4AF37" Foreground="Black" FontWeight="Bold" Padding="25,10" Cursor="Hand">
+                <Button.Effect>
+                    <DropShadowEffect BlurRadius="10" Opacity="0.3" ShadowDepth="2"/>
+                </Button.Effect>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,39 @@
+﻿<Window x:Class="RestaurantOrderApp.Views.StartWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RestaurantOrderApp.Views"
+        mc:Ignorable="d"
+        Title="Teatris Galati - Welcome" Height="500" Width="400" 
+        WindowStartupLocation="CenterScreen" 
+        Background="#1A1A1A"
+        
+        WindowStyle="None" 
+        WindowState="Maximized" 
+        ResizeMode="NoResize">
+    <Grid>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="280">
+            <TextBlock Text="TEATRIS" FontSize="48" FontFamily="Playfair Display, Georgia, Serif" 
+                       HorizontalAlignment="Center" Foreground="#D4AF37" Margin="0,0,0,5"/>
+
+            <Button Content="EXPLORE THE MENU" Click="OpenMenu_Click" Height="45" Margin="0,10"
+                    Background="#D4AF37" Foreground="Black" FontWeight="Bold" BorderThickness="0">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="5"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <Button Content="SIGN IN" Click="OpenLogin_Click" Height="45" Margin="0,10"
+                    Background="Transparent" Foreground="White" BorderBrush="White" BorderThickness="1"/>
+
+            <Button Content="CREATE AN ACCOUNT" Click="OpenRegister_Click" Height="45" Margin="0,10"
+                    Background="Transparent" Foreground="White" BorderBrush="White" BorderThickness="1" FontSize="11"/>
+            <Button Content="EXIT APP" Click="ExitApp_Click" 
+                    VerticalAlignment="Top" HorizontalAlignment="Right" 
+                    Margin="20" Background="Transparent" Foreground="White" BorderBrush="White" BorderThickness="1"/>
+        </StackPanel>
+    </Grid>
+</Window>
