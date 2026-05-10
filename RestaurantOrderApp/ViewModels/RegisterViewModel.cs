@@ -48,15 +48,22 @@ namespace RestaurantOrderApp.ViewModels
             {
                 try
                 {
+                    bool exists = db.Users.Any(u => u.Email == Email);
+                    if (exists)
+                    {
+                        StatusMessage = "This email is already registered.";
+                        return;
+                    }
                     var pFirstName = new Microsoft.Data.SqlClient.SqlParameter("@FirstName", FirstName);
                     var pLastName = new Microsoft.Data.SqlClient.SqlParameter("@LastName", LastName);
                     var pEmail = new Microsoft.Data.SqlClient.SqlParameter("@Email", Email);
                     var pPassword = new Microsoft.Data.SqlClient.SqlParameter("@Password", pass);
                     var pPhone = new Microsoft.Data.SqlClient.SqlParameter("@Phone", PhoneNumber);
                     var pAddress = new Microsoft.Data.SqlClient.SqlParameter("@Address", Address);
+                    var pRole = new Microsoft.Data.SqlClient.SqlParameter("@Role", "Client");
 
-                    db.Database.ExecuteSqlRaw("EXEC RegisterUser @FirstName, @LastName, @Email, @Password, @Phone, @Address",
-                        pFirstName, pLastName, pEmail, pPassword, pPhone, pAddress);
+                    db.Database.ExecuteSqlRaw("EXEC RegisterUser @LastName, @FirstName, @Email, @Phone, @Address,@Password, @Role",
+                        pLastName,pFirstName, pEmail, pPhone, pAddress, pPassword, pRole);
 
                     System.Windows.MessageBox.Show("Account created successfully! Welcome to Teatris.", "Success");
 
@@ -68,7 +75,7 @@ namespace RestaurantOrderApp.ViewModels
                 }
                 catch (System.Exception ex)
                 {
-                    StatusMessage = "Error: Email might already be in use.";
+                    StatusMessage = $"Error: {ex.InnerException?.Message ?? ex.Message}";
                 }
             }
         }
