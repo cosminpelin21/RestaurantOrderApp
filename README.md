@@ -29,13 +29,21 @@ A modern desktop application developed in WPF (Windows Presentation Foundation) 
 
 ## ⚙️ Setup and Installation
 
-1.  **Database**: 
-    * Ensure a local `SQLEXPRESS` server is running.
-    * The application targets a database named `RestaurantDB`.
-2.  **Connection Configuration**:
-    * The default connection string is located in `RestaurantDbContext.cs`.
-3.  **Run**:
-    * Open `RestaurantOrderApp.sln` in Visual Studio and run the project.
+1. Clone the repository: git clone https://github.com/cosminpelin21/RestaurantOrderApp.git
+2. Database Setup:
+
+   *Open SQL Server Management Studio (SSMS).
+
+   *Open the script.sql file provided in this repository.
+
+   *Execute the script (F5) to create the RestaurantDB database, tables, and stored procedures.
+3. Test Credentials:
+   
+   *The script includes seed data for immediate testing:
+
+         Admin/Staff: admin@restaurant.ro | Password: admin123
+
+         Client: maria.p@email.com | Password: client123
 
 ## 👥 Author
 
