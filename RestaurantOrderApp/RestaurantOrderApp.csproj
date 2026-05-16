@@ -9,6 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\branzeturi-mixte_0.jpeg" />
+    <None Remove="Images\bruschette-cu-somon-fume_0.jpeg" />
+    <None Remove="Images\bruschette-mixte-cu-prosciutto-si-parmezan.jpg" />
+    <None Remove="Images\ciorba-zilei.jpeg" />
+    <None Remove="Images\humus-cu-alune-si-crutoane-din-muschi-de-vita.jpg" />
+    <None Remove="Images\mic-dejun-fitness.jpg" />
+    <None Remove="Images\supa-mediteraneana_0.jpeg" />
+    <None Remove="Images\tartar-de-ton-cu-sfecla-rosiecrema-de-avocado-sos-allioli.jpeg" />
+    <None Remove="Images\tigaie-cu-ou-prajit-si-bacon-cartofi-baby-spanac-si-rosii-cherry.jpeg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -19,6 +31,36 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\branzeturi-mixte_0.jpeg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\bruschette-cu-somon-fume_0.jpeg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\bruschette-mixte-cu-prosciutto-si-parmezan.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\ciorba-zilei.jpeg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\humus-cu-alune-si-crutoane-din-muschi-de-vita.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\mic-dejun-fitness.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\supa-mediteraneana_0.jpeg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\tartar-de-ton-cu-sfecla-rosiecrema-de-avocado-sos-allioli.jpeg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\tigaie-cu-ou-prajit-si-bacon-cartofi-baby-spanac-si-rosii-cherry.jpeg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

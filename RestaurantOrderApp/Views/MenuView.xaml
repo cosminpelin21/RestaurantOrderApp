@@ -83,12 +83,33 @@
                             <Border BorderBrush="#1AFFFFFF" BorderThickness="0,0,0,1" Padding="10,20">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <Image Grid.Column="0" 
+           Source="{Binding ImagePath}" 
+           Width="80" Height="80" 
+           Stretch="UniformToFill" 
+           Margin="0,0,20,0"
+           VerticalAlignment="Center">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ImagePath}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ImagePath}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Name}" FontSize="22" Foreground="White" FontFamily="Georgia"/>
 
                                         <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
@@ -97,27 +118,10 @@
                                             <TextBlock Text="{Binding PortionQuantity}" FontSize="12" Foreground="#888"/>
                                         </StackPanel>
 
-                                        <TextBlock Text="{Binding Ingredients}" 
-               FontSize="11" 
-               Foreground="#777" 
-               Margin="0,6,0,0" 
-               TextWrapping="Wrap" 
-               MaxHeight="40" 
-               FontStyle="Normal"/>
+                                        <TextBlock Text="{Binding Ingredients}" FontSize="11" Foreground="#777" Margin="0,6,0,0" TextWrapping="Wrap" MaxHeight="40"/>
+                                        <TextBlock Text="{Binding AllergensList, StringFormat='Allergens: {0}'}" FontSize="10" FontStyle="Italic" Foreground="#D4AF37" Opacity="0.7" Margin="0,2,0,0" TextWrapping="Wrap"/>
 
-                                        <TextBlock Text="{Binding AllergensList, StringFormat='Allergens: {0}'}" 
-               FontSize="10" 
-               FontStyle="Italic" 
-               Foreground="#D4AF37" 
-               Opacity="0.7"
-               Margin="0,2,0,0"
-               TextWrapping="Wrap"/>
-                                        <TextBlock Text="UNAVAILABLE" 
-           Foreground="#FF4C4C" 
-           FontWeight="Bold" 
-           FontSize="12" 
-           Margin="0,8,0,0"
-           FontFamily="Georgia">
+                                        <TextBlock Text="UNAVAILABLE" Foreground="#FF4C4C" FontWeight="Bold" FontSize="12" Margin="0,8,0,0" FontFamily="Georgia">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -131,16 +135,9 @@
                                         </TextBlock>
                                     </StackPanel>
 
-                                    <TextBlock Grid.Column="1" Text="{Binding Price, StringFormat='{}{0} LEI'}" 
-                   FontSize="20" Foreground="#D4AF37" FontWeight="Light"
-                   VerticalAlignment="Center" Margin="30,0"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Price, StringFormat='{}{0} LEI'}" FontSize="20" Foreground="#D4AF37" FontWeight="Light" VerticalAlignment="Center" Margin="30,0"/>
 
-                                    <Button Grid.Column="2" Content="+" Width="40" Height="40"
-                Command="{Binding DataContext.AddToCartCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                CommandParameter="{Binding}"
-                Background="Transparent" Foreground="#D4AF37" 
-                BorderBrush="#D4AF37" BorderThickness="1"
-                Cursor="Hand" VerticalAlignment="Center">
+                                    <Button Grid.Column="3" Content="+" Width="40" Height="40" Command="{Binding DataContext.AddToCartCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" Background="Transparent" Foreground="#D4AF37" BorderBrush="#D4AF37" BorderThickness="1" Cursor="Hand" VerticalAlignment="Center">
                                         <Button.Resources>
                                             <Style TargetType="Border">
                                                 <Setter Property="CornerRadius" Value="20"/>

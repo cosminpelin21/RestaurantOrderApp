@@ -35,6 +35,12 @@ namespace RestaurantOrderApp.ViewModels
             get => _pIngredients;
             set { _pIngredients = value; OnPropertyChanged(); }
         }
+        private string _pImagePath;
+        public string PImagePath
+        {
+            get => _pImagePath;
+            set { _pImagePath = value; OnPropertyChanged(); }
+        }
         private string _newCategoryName;
         public string NewCategoryName { get => _newCategoryName; set { _newCategoryName = value; OnPropertyChanged(); } }
 
@@ -54,6 +60,7 @@ namespace RestaurantOrderApp.ViewModels
                 PStock = 0;
                 PCategory = null;
                 PIngredients = "";
+                PImagePath = "";
             });
             SaveProductCommand = new RelayCommand(async _ => await ExecuteSaveProduct());
             DeleteProductCommand = new RelayCommand(async _ => await ExecuteDeleteProduct());
@@ -84,6 +91,7 @@ namespace RestaurantOrderApp.ViewModels
             PStock = SelectedProduct.TotalQuantity;
             PCategory = Categories.FirstOrDefault(c => c.CategoryId == SelectedProduct.CategoryId);
             PIngredients = SelectedProduct.Ingredients;
+            PImagePath = SelectedProduct.ImagePath;
         }
 
         private async Task ExecuteSaveProduct()
@@ -106,6 +114,7 @@ namespace RestaurantOrderApp.ViewModels
                     TotalQuantity = PStock,
                     CategoryId = PCategory.CategoryId,
                     Ingredients = PIngredients,
+                    ImagePath = PImagePath
                 };
                 db.Products.Add(newProd);
                 MessageBox.Show("Product successfully added!");
@@ -121,6 +130,7 @@ namespace RestaurantOrderApp.ViewModels
                     p.TotalQuantity = PStock;
                     p.CategoryId = PCategory.CategoryId;
                     p.Ingredients = PIngredients;
+                    p.ImagePath = PImagePath;
                     MessageBox.Show("Updated product!");
                 }
             }
