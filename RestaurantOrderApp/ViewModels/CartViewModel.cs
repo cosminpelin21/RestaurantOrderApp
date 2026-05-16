@@ -149,7 +149,7 @@ namespace RestaurantOrderApp.ViewModels
                     loginWin.ShowDialog();
 
                     if (UserSession.CurrentUser != null)
-                    { 
+                    {
                         foreach (var window in oldWindows)
                         {
                             window.Close();
@@ -168,11 +168,30 @@ namespace RestaurantOrderApp.ViewModels
                         currentUserId, TotalCost, "Waiting", DateTime.Now).AsEnumerable().FirstOrDefault();
 
                     int newOrderId = Convert.ToInt32(result);
-                    foreach (var product in GroupedItems)
+                    foreach (var cartItem in GroupedItems)
                     {
-                        db.Database.ExecuteSqlRaw(
-                            "EXEC AddOrderDetail @OrderId={0}, @ProductId={1}, @Quantity={2}",
-                            newOrderId, product.Product.ProductId, product.Quantity);
+                        if (cartItem.Product.ProductId < 0)
+                        {
+                            int realMenuId = -cartItem.Product.ProductId;
+
+                            var menuWithComponents = db.Menus.Include(m => m.Products).FirstOrDefault(m => m.MenuId == realMenuId);
+
+                            if (menuWithComponents != null)
+                            {
+                                foreach (var componentProduct in menuWithComponents.Products)
+                                {
+                                    db.Database.ExecuteSqlRaw(
+                                        "EXEC AddOrderDetail @OrderId={0}, @ProductId={1}, @Quantity={2}",
+                                        newOrderId, componentProduct.ProductId, cartItem.Quantity);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            db.Database.ExecuteSqlRaw(
+                                "EXEC AddOrderDetail @OrderId={0}, @ProductId={1}, @Quantity={2}",
+                                newOrderId, cartItem.Product.ProductId, cartItem.Quantity);
+                        }
                     }
                     MessageBox.Show($"Order #{newOrderId}  was successfully placed!\n" +
                             $"Estimated delivery time: {DateTime.Now.AddMinutes(45):HH:mm}");

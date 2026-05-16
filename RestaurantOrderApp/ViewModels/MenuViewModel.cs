@@ -224,12 +224,88 @@ namespace RestaurantOrderApp.ViewModels
                         }
                     }
 
-                    var filtered = await query
-                        .OrderBy(p => p.Category.Name)
-                        .ThenBy(p => p.Name)
+                    var regularProducts = await query.ToListAsync();
+
+                    decimal discountPercent = 10;
+                    var discountSetting = System.Configuration.ConfigurationManager.AppSettings["DiscountPercent"];
+                    if (discountSetting != null)
+                    {
+                        decimal.TryParse(discountSetting, out discountPercent);
+                    }
+
+                    var complexMenus = await db.Menus
+                        .Include(m => m.Category)
+                        .Include(m => m.Products)
+                            .ThenInclude(p => p.Allergens)
                         .ToListAsync();
 
-                    Products = new ObservableCollection<Product>(filtered);
+                    var convertedMenus = new List<Product>();
+
+                    foreach (var menu in complexMenus)
+                    {
+                        decimal totalPrice = menu.Products.Sum(p => p.Price);
+                        decimal finalPrice = totalPrice - (totalPrice * (discountPercent / 100m));
+                        finalPrice = Math.Round(finalPrice, 2);
+
+                        string ingredientsText = "Promotional menu consisting of: " + string.Join(", ", menu.Products.Select(p => p.Name));
+                        string portionsText = string.Join(" + ", menu.Products.Select(p => p.PortionQuantity));
+
+                        var combinedAllergens = menu.Products
+                            .SelectMany(p => p.Allergens ?? new List<Allergen>())
+                            .GroupBy(a => a.AllergenId)
+                            .Select(g => g.First())
+                            .ToList();
+
+                        string imagePath = menu.Products.FirstOrDefault(p => !string.IsNullOrEmpty(p.ImagePath))?.ImagePath ?? "/Images/default-menu.jpg";
+
+                        decimal availableStock = menu.Products.Any() ? menu.Products.Min(p => p.TotalQuantity) : 0;
+
+                        var menuAsProduct = new Product
+                        {
+                            ProductId = -menu.MenuId,
+                            Name = menu.Name,
+                            Price = finalPrice,
+                            PortionQuantity = portionsText,
+                            TotalQuantity = availableStock,
+                            CategoryId = menu.CategoryId,
+                            Category = menu.Category,
+                            Ingredients = ingredientsText,
+                            ImagePath = imagePath,
+                            Allergens = combinedAllergens
+                        };
+
+                        convertedMenus.Add(menuAsProduct);
+                    }
+
+                    if (SelectedCategory != null)
+                    {
+                        convertedMenus = convertedMenus.Where(m => m.CategoryId == SelectedCategory.CategoryId).ToList();
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(SearchKeyword))
+                    {
+                        convertedMenus = convertedMenus.Where(m => m.Name.Contains(SearchKeyword, StringComparison.OrdinalIgnoreCase)).ToList();
+                    }
+
+                    if (SelectedSearchAllergen != null)
+                    {
+                        int currentAllergenId = SelectedSearchAllergen.AllergenId;
+                        if (ExcludeAllergen)
+                        {
+                            convertedMenus = convertedMenus.Where(m => !m.Allergens.Any(a => a.AllergenId == currentAllergenId)).ToList();
+                        }
+                        else
+                        {
+                            convertedMenus = convertedMenus.Where(m => m.Allergens.Any(a => a.AllergenId == currentAllergenId)).ToList();
+                        }
+                    }
+
+                    var allItems = regularProducts.Concat(convertedMenus)
+                        .OrderBy(p => p.Category?.Name ?? "")
+                        .ThenBy(p => p.Name)
+                        .ToList();
+
+                    Products = new ObservableCollection<Product>(allItems);
                 }
             }
             catch (Exception ex)
