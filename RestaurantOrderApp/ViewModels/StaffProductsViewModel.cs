@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantOrderApp.Helpers;
+using RestaurantOrderApp.Layers.BusinessLogicLayer;
 using RestaurantOrderApp.Models;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace RestaurantOrderApp.ViewModels
 {
     public class StaffProductsViewModel : BaseViewModel
     {
+        private readonly ProductBLL _productBll = new ProductBLL();
         public ObservableCollection<Product> Products { get; set; } = new ObservableCollection<Product>();
         public ObservableCollection<Category> Categories { get; set; } = new ObservableCollection<Category>();
 
@@ -72,14 +74,22 @@ namespace RestaurantOrderApp.ViewModels
 
         private async Task InitializeAsync()
         {
-            using var db = new RestaurantDbContext();
-            var products = await db.Products.Include(p => p.Category).ToListAsync();
-            var categories = await db.Categories.ToListAsync();
+            try
+            {
+                var products = await _productBll.GetAllProductsWithCategoryAsync();
+                var categories = await _productBll.GetAllCategoriesAsync();
 
-            Products.Clear();
-            products.ForEach(Products.Add);
-            Categories.Clear();
-            categories.ForEach(Categories.Add);
+                Products.Clear();
+                products.ForEach(Products.Add);
+
+                Categories.Clear();
+                categories.ForEach(Categories.Add);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Error loading management data: " + ex.Message,
+                    "Error Initialization", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
         }
 
         private void FillProductForm()
@@ -102,61 +112,73 @@ namespace RestaurantOrderApp.ViewModels
                 return;
             }
 
-            using var db = new RestaurantDbContext();
-
-            if (SelectedProduct == null)
+            try
             {
-                var newProd = new Product
-                {
-                    Name = PName,
-                    Price = PPrice,
-                    PortionQuantity = PPortion,
-                    TotalQuantity = PStock,
-                    CategoryId = PCategory.CategoryId,
-                    Ingredients = PIngredients,
-                    ImagePath = PImagePath
-                };
-                db.Products.Add(newProd);
-                MessageBox.Show("Product successfully added!");
-            }
-            else 
-            {
-                var p = await db.Products.FindAsync(SelectedProduct.ProductId);
-                if (p != null)
-                {
-                    p.Name = PName;
-                    p.Price = PPrice;
-                    p.PortionQuantity = PPortion;
-                    p.TotalQuantity = PStock;
-                    p.CategoryId = PCategory.CategoryId;
-                    p.Ingredients = PIngredients;
-                    p.ImagePath = PImagePath;
-                    MessageBox.Show("Updated product!");
-                }
-            }
+                int? productId = SelectedProduct?.ProductId;
 
-            await db.SaveChangesAsync();
-            await InitializeAsync();
+                await _productBll.SaveProductAsync(
+                    productId,
+                    PName,
+                    PPrice,
+                    PPortion,
+                    PStock,
+                    PCategory.CategoryId,
+                    PIngredients,
+                    PImagePath
+                );
+
+                if (SelectedProduct == null)
+                    MessageBox.Show("Product successfully added!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                else
+                    MessageBox.Show("Updated product!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                await InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving product: {ex.Message}", "Avertisment", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private async Task ExecuteDeleteProduct()
         {
-            if (SelectedProduct == null) return;
-            using var db = new RestaurantDbContext();
-            var p = await db.Products.FindAsync(SelectedProduct.ProductId);
-            db.Products.Remove(p);
-            await db.SaveChangesAsync();
-            await InitializeAsync();
+            if (SelectedProduct == null) 
+                return;
+            try
+            {
+                await _productBll.DeleteProductAsync(SelectedProduct.ProductId);
+
+                System.Windows.MessageBox.Show("The product has been successfully deleted!", "Succes",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+
+                await InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Could not delete product: {ex.Message}", "Warning",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            }
         }
 
         private async Task ExecuteAddCategory()
         {
             if (string.IsNullOrWhiteSpace(NewCategoryName)) return;
-            using var db = new RestaurantDbContext();
-            db.Categories.Add(new Category { Name = NewCategoryName });
-            await db.SaveChangesAsync();
-            NewCategoryName = "";
-            await InitializeAsync();
+
+            try
+            {
+                await _productBll.AddCategoryAsync(NewCategoryName);
+
+                System.Windows.MessageBox.Show("Categoria a fost adăugată cu succes!", "Succes",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+
+                NewCategoryName = "";
+                await InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Eroare la adăugarea categoriei: {ex.Message}", "Avertisment",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            }
         }
 
         private async Task ExecuteDeleteCategory(Category cat)
@@ -168,21 +190,11 @@ namespace RestaurantOrderApp.ViewModels
 
             try
             {
-                using var db = new RestaurantDbContext();
+                await _productBll.DeleteCategoryAsync(cat.CategoryId);
 
-                bool hasProducts = await db.Products.AnyAsync(p => p.CategoryId == cat.CategoryId);
-                if (hasProducts)
-                {
-                    MessageBox.Show("You cannot delete this category because it contains active products! Delete products first.");
-                    return;
-                }
+                MessageBox.Show("Categoria a fost ștearsă cu succes!", "Succes",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
 
-                var dbCat = await db.Categories.FindAsync(cat.CategoryId);
-                if (dbCat != null)
-                {
-                    db.Categories.Remove(dbCat);
-                    await db.SaveChangesAsync();
-                }
                 await InitializeAsync();
             }
             catch (Exception ex)

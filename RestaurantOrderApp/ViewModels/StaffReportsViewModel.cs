@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantOrderApp.Helpers;
+using RestaurantOrderApp.Layers.BusinessLogicLayer;
 using RestaurantOrderApp.Models;
 using System;
 using System.Collections.ObjectModel;
@@ -11,6 +12,7 @@ namespace RestaurantOrderApp.ViewModels
 {
     public class StaffReportsViewModel : BaseViewModel
     {
+        private readonly ProductBLL _productBll = new ProductBLL();
         public ObservableCollection<Product> CriticalProducts { get; set; } = new ObservableCollection<Product>();
 
         private int _threshold;
@@ -30,16 +32,17 @@ namespace RestaurantOrderApp.ViewModels
 
         public async Task LoadCriticalStockAsync()
         {
-            using (var db = new RestaurantDbContext())
+            try
             {
-                var critical = await db.Products
-                    .Include(p => p.Category)
-                    .Where(p => p.TotalQuantity <= Threshold)
-                    .OrderBy(p => p.TotalQuantity)
-                    .ToListAsync();
+                var critical = await _productBll.GetCriticalStockProductsAsync(Threshold);
 
                 CriticalProducts.Clear();
                 critical.ForEach(CriticalProducts.Add);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Error loading critical stock: " + ex.Message,
+                    "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }
     }

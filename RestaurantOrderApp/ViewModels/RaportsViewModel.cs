@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantOrderApp.Helpers;
+using RestaurantOrderApp.Layers.BusinessLogicLayer;
 using RestaurantOrderApp.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace RestaurantOrderApp.ViewModels
 {
     public class ReportsViewModel : BaseViewModel
     {
+        private readonly OrderBLL _orderBll = new OrderBLL();
         private ObservableCollection<Product> _criticalStock;
         public ObservableCollection<Product> CriticalStock
         {
@@ -40,33 +42,19 @@ namespace RestaurantOrderApp.ViewModels
 
         public async Task LoadReportsAsync()
         {
-            using (var db = new RestaurantDbContext())
+            try
             {
-                var critical = await db.Products
-                    .FromSqlRaw("EXEC GetCriticalStock @Threshold = 10")
-                    .ToListAsync();
-                CriticalStock = new ObservableCollection<Product>(critical);
+                var criticalList = await _orderBll.GetCriticalStockReportAsync(10);
+                CriticalStock = new ObservableCollection<Product>(criticalList);
 
-                var conn = db.Database.GetDbConnection();
-                await conn.OpenAsync();
-                using (var command = conn.CreateCommand())
-                {
-                    command.CommandText = "EXEC GetTopSellingProducts";
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        var stats = new ObservableCollection<ProductStats>();
-                        while (await reader.ReadAsync())
-                        {
-                            stats.Add(new ProductStats
-                            {
-                                Name = reader.GetString(0),
-                                TotalSold = reader.GetInt32(1),
-                                TotalRevenue = reader.GetDecimal(2)
-                            });
-                        }
-                        TopProducts = stats;
-                    }
-                }
+                var statsList = await _orderBll.GetTopSellingProductsStatsAsync();
+                TopProducts = new ObservableCollection<ProductStats>(statsList);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Error generating reports data: " + ex.Message,
+                    "Reports Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+
             }
         }
     }

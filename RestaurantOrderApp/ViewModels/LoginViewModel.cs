@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using RestaurantOrderApp.Helpers;
+using RestaurantOrderApp.Layers.BusinessLogicLayer;
+using RestaurantOrderApp.Models;
+using RestaurantOrderApp.Views;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using RestaurantOrderApp.Helpers;
-using RestaurantOrderApp.Models;
-using RestaurantOrderApp.Views;
 
 namespace RestaurantOrderApp.ViewModels
 {
@@ -16,6 +17,7 @@ namespace RestaurantOrderApp.ViewModels
     {
         private string _email = "";
         private string _statusMessage = "";
+        private readonly UserBLL _userBll = new UserBLL();
 
         public string Email
         {
@@ -43,46 +45,32 @@ namespace RestaurantOrderApp.ViewModels
         private void ExecuteLogin(object? parameter)
         {
             var passwordBox = parameter as System.Windows.Controls.PasswordBox;
-            string pass= passwordBox?.Password ?? "";
+            string pass = passwordBox?.Password ?? "";
 
-            if(string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(pass))
+            try
             {
-                StatusMessage = "Please provide your credentials.";
-                return;
-            }
+                User user = _userBll.ValidateAndLogin(Email, pass);
 
-            using (var db = new RestaurantDbContext())
+                UserSession.CurrentUser = user;
+                Window nextWindow = null;
+
+                if (user.Role == "Client")
+                {
+                    nextWindow = new MenuView();
+                }
+                else if (user.Role == "Employee" || user.Role == "Admin")
+                {
+                    nextWindow = new AdminView();
+                }
+
+                nextWindow?.Show();
+                var loginWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w is LoginWindow);
+                loginWindow?.Close();
+            }
+            catch (Exception ex)
             {
-                var emailParam = new Microsoft.Data.SqlClient.SqlParameter("@Email", Email);
-                var passParam = new Microsoft.Data.SqlClient.SqlParameter("@Password", pass);
-
-                var user = db.Users
-                    .FromSqlRaw("EXEC LoginUser @Email, @Password", emailParam, passParam)
-                    .AsEnumerable()
-                    .FirstOrDefault();
-
-                if (user != null)
-                {
-                    UserSession.CurrentUser = user;
-                    Window nextWindow=null;
-                    if (user.Role == "Client")
-                    {
-                        nextWindow = new MenuView();
-                    }
-                    else if (user.Role == "Employee" || user.Role == "Admin")
-                    {
-                        nextWindow = new AdminView();
-                    }
-                    nextWindow?.Show();
-                    var loginWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w is LoginWindow);
-                    loginWindow?.Close();
-                }
-                else
-                {
-                    StatusMessage = "Invalid username or password.";
-                }
+                StatusMessage = ex.Message;
             }
-
         }
     }
 }

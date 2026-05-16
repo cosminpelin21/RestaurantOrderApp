@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantOrderApp.Helpers;
+using RestaurantOrderApp.Layers.BusinessLogicLayer;
 using RestaurantOrderApp.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace RestaurantOrderApp.ViewModels
 {
     public class StaffOrdersViewModel : BaseViewModel
     {
+        private readonly OrderBLL _orderBll = new OrderBLL();
         private ObservableCollection<Order> _allOrders;
         public ObservableCollection<Order> AllOrders
         {
@@ -32,16 +34,14 @@ namespace RestaurantOrderApp.ViewModels
 
         public async Task LoadOrdersAsync()
         {
-            using (var db = new RestaurantDbContext())
+            try
             {
-                var orders = await db.Orders
-                    .Include(o => o.User)
-                    .Include(o => o.OrderDetails)
-                        .ThenInclude(od => od.Product)
-                    .OrderByDescending(o => o.OrderDate)
-                    .ToListAsync();
-
+                var orders = await _orderBll.GetAllOrdersAsync();
                 AllOrders = new ObservableCollection<Order>(orders);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading all orders: " + ex.Message);
             }
         }
 
@@ -49,14 +49,15 @@ namespace RestaurantOrderApp.ViewModels
         {
             if (order == null) return;
 
-            using (var db = new RestaurantDbContext())
+            try
             {
-                await db.Database.ExecuteSqlRawAsync(
-                    "EXEC UpdateOrderStatus @OrderID = {0}, @NewStatus = {1}",
-                    order.OrderId, newStatus);
+                await _orderBll.ChangeStatusAsync(order.OrderId, newStatus);
+                await LoadOrdersAsync();
             }
-
-            await LoadOrdersAsync();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error changing status: " + ex.Message);
+            }
         }
 
         private async Task CancelOrderAsync(Order order)
@@ -66,22 +67,16 @@ namespace RestaurantOrderApp.ViewModels
             var result = MessageBox.Show($"Are you sure you want to cancel order {order.OrderCode}?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
-            using (var db = new RestaurantDbContext())
+            try
             {
-                var dbOrder = await db.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.OrderId == order.OrderId);
-                if (dbOrder != null)
-                {
-                    dbOrder.Status = "Cancelled";
-
-                    foreach (var detail in dbOrder.OrderDetails)
-                    {
-                        var product = await db.Products.FindAsync(detail.ProductId);
-                        if (product != null) product.TotalQuantity += detail.Quantity;
-                    }
-                    await db.SaveChangesAsync();
-                }
+                await _orderBll.CancelOrderAsync(order.OrderId);
+                MessageBox.Show("The order has been canceled by the staff!");
+                await LoadOrdersAsync();
             }
-            await LoadOrdersAsync();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not cancel order: " + ex.Message);
+            }
         }
     }
 }

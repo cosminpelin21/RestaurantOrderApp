@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantOrderApp.Helpers;
+using RestaurantOrderApp.Layers.BusinessLogicLayer;
 using RestaurantOrderApp.Models;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace RestaurantOrderApp.ViewModels
 {
     public class AdminViewModel : BaseViewModel
     {
+        private readonly ProductBLL _productBll = new ProductBLL();
         private ObservableCollection<Product> _products;
         private Product _selectedProduct;
         private ObservableCollection<Category> _categories;
@@ -47,31 +49,64 @@ namespace RestaurantOrderApp.ViewModels
 
         private void LoadData()
         {
-            using (var db = new RestaurantDbContext())
+            try
             {
-                Products = new ObservableCollection<Product>(db.Products.Include(p => p.Category).ToList());
-                Categories = new ObservableCollection<Category>(db.Categories.ToList());
+                var products = _productBll.GetProductsForAdmin();
+                var categories = _productBll.GetCategoriesForAdmin();
+
+                Products = new ObservableCollection<Product>(products);
+                Categories = new ObservableCollection<Category>(categories);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Eroare la încărcarea panoului de administrare: " + ex.Message, "Error");
             }
         }
 
         private void ExecuteAdd(object obj)
         {
-            using (var db = new RestaurantDbContext())
+            if (Categories == null || !Categories.Any())
             {
-                db.Database.ExecuteSqlRaw("EXEC AddProduct @Name={0}, @Price={1}, @PortionQuantity={2}, @TotalQuantity={3}, @CategoryId={4}, @ImagePath={5}",
-                    "Produs Nou", 25.00, "300g", 50, Categories.First().CategoryId, null);
+                MessageBox.Show("There is no category in the database to associate the new product!");
+                return;
+            }
+
+            try
+            {
+                int firstCategoryId = Categories.First().CategoryId;
+
+                _productBll.CreateProductFromAdmin("New Product", 25.00m, "300g", 50, firstCategoryId, null);
+
+                MessageBox.Show("The default product has been successfully added via the stored procedure!");
+
                 LoadData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error executing the add procedure: " + ex.Message, "Warning");
             }
         }
 
         private void ExecuteDelete(object obj)
         {
+            if (SelectedProduct == null)
+            {
+                MessageBox.Show("Please select a product from the table first to delete it.");
+                return;
+            }
+
             if (MessageBox.Show("Are you sure you are deleting the product?", "Confirmation", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                using (var db = new RestaurantDbContext())
+                try
                 {
-                    db.Database.ExecuteSqlRaw("EXEC DeleteProduct @ProductId={0}", SelectedProduct.ProductId);
+                    _productBll.RemoveProductFromAdmin(SelectedProduct.ProductId);
+
+                    MessageBox.Show("The product has been permanently removed from the menu!");
                     LoadData();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error executing deletion procedure: " + ex.Message, "Warning");
                 }
             }
         }

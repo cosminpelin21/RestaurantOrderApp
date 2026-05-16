@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantOrderApp.Helpers;
+using RestaurantOrderApp.Layers.BusinessLogicLayer;
 using RestaurantOrderApp.Models;
 using RestaurantOrderApp.Views;
 using System;
@@ -19,6 +20,7 @@ namespace RestaurantOrderApp.ViewModels
         private decimal _totalCost;
         private decimal _discountAmount;
         private bool _isLoyalCustomer;
+        private readonly OrderBLL _orderBll = new OrderBLL();
         public decimal DiscountAmount
         {
             get => _discountAmount;
@@ -81,7 +83,8 @@ namespace RestaurantOrderApp.ViewModels
 
         public void CalculateTotals()
         {
-            if (GroupedItems == null) return;
+            if (GroupedItems == null)
+                return;
 
             decimal x = decimal.Parse(ConfigurationManager.AppSettings["DiscountPercent"] ?? "10");
             decimal w = decimal.Parse(ConfigurationManager.AppSettings["MinOrderForFreeDelivery"] ?? "200");
@@ -160,47 +163,18 @@ namespace RestaurantOrderApp.ViewModels
             }
             try
             {
-                using (var db = new RestaurantDbContext())
-                {
-                    int currentUserId = UserSession.CurrentUser.UserId;
-                    var result = db.Database.SqlQueryRaw<decimal>(
-                        "EXEC PlaceOrder @UserId={0}, @TotalCost={1}, @Status={2}, @OrderDate={3}",
-                        currentUserId, TotalCost, "Waiting", DateTime.Now).AsEnumerable().FirstOrDefault();
+                int currentUserId = UserSession.CurrentUser.UserId;
 
-                    int newOrderId = Convert.ToInt32(result);
-                    foreach (var cartItem in GroupedItems)
-                    {
-                        if (cartItem.Product.ProductId < 0)
-                        {
-                            int realMenuId = -cartItem.Product.ProductId;
+                // Apelăm metoda centralizată din BLL pentru a crea comanda pe straturi
+                int newOrderId = _orderBll.CreateOrderFromCart(currentUserId, TotalCost, GroupedItems);
 
-                            var menuWithComponents = db.Menus.Include(m => m.Products).FirstOrDefault(m => m.MenuId == realMenuId);
+                MessageBox.Show($"Order #{newOrderId} was successfully placed!\n" +
+                        $"Estimated delivery time: {DateTime.Now.AddMinutes(45):HH:mm}");
 
-                            if (menuWithComponents != null)
-                            {
-                                foreach (var componentProduct in menuWithComponents.Products)
-                                {
-                                    db.Database.ExecuteSqlRaw(
-                                        "EXEC AddOrderDetail @OrderId={0}, @ProductId={1}, @Quantity={2}",
-                                        newOrderId, componentProduct.ProductId, cartItem.Quantity);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            db.Database.ExecuteSqlRaw(
-                                "EXEC AddOrderDetail @OrderId={0}, @ProductId={1}, @Quantity={2}",
-                                newOrderId, cartItem.Product.ProductId, cartItem.Quantity);
-                        }
-                    }
-                    MessageBox.Show($"Order #{newOrderId}  was successfully placed!\n" +
-                            $"Estimated delivery time: {DateTime.Now.AddMinutes(45):HH:mm}");
-
-                    GroupedItems.Clear();
-                    _sourceItems.Clear();
-                    CalculateTotals();
-                    Application.Current.Windows.OfType<CartView>().FirstOrDefault()?.Close();
-                }
+                GroupedItems.Clear();
+                _sourceItems.Clear();
+                CalculateTotals();
+                Application.Current.Windows.OfType<CartView>().FirstOrDefault()?.Close();
             }
             catch (Exception ex)
             {
@@ -215,17 +189,14 @@ namespace RestaurantOrderApp.ViewModels
             {
                 int z = int.Parse(ConfigurationManager.AppSettings["DiscountOrdersCountThreshold"] ?? "3");
                 int t = int.Parse(ConfigurationManager.AppSettings["DiscountDaysThreshold"] ?? "30");
-                DateTime cutoffDate = DateTime.Now.AddDays(-t);
+                int currentUserId = UserSession.CurrentUser.UserId;
 
-                using (var db = new RestaurantDbContext())
+                await Task.Run(() =>
                 {
-                    int recentOrdersCount = await db.Orders
-                        .CountAsync(o => o.UserId == UserSession.CurrentUser.UserId && o.OrderDate >= cutoffDate);
+                    _isLoyalCustomer = _orderBll.IsCustomerLoyal(currentUserId, z, t);
+                });
 
-                    _isLoyalCustomer = recentOrdersCount > z;
-
-                    CalculateTotals();
-                }
+                CalculateTotals();
             }
             catch
             {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantOrderApp.Helpers;
+using RestaurantOrderApp.Layers.BusinessLogicLayer;
 using RestaurantOrderApp.Models;
 using System;
 using System.Collections.Generic;
@@ -7,12 +8,14 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace RestaurantOrderApp.ViewModels
 {
     public class MyOrdersViewModel : BaseViewModel
     {
         private ObservableCollection<Order> _userOrders;
+        private readonly OrderBLL _orderBll = new OrderBLL();
         public ObservableCollection<Order> UserOrders
         {
             get => _userOrders;
@@ -37,22 +40,8 @@ namespace RestaurantOrderApp.ViewModels
 
             try
             {
-                using (var db = new RestaurantDbContext())
-                {
-                    var orders = await db.Orders
-                        .Where(o => o.UserId == UserSession.CurrentUser.UserId)
-                        .Include(o => o.OrderDetails)
-                            .ThenInclude(od => od.Product)
-                        .OrderByDescending(o => o.OrderDate)
-                        .ToListAsync();
-
-                    UserOrders = new ObservableCollection<Order>(orders);
-
-                    if (UserOrders.Count == 0)
-                    {
-                        System.Diagnostics.Debug.WriteLine("No commands found for this user.");
-                    }
-                }
+                var orders = await _orderBll.GetUserOrderHistoryAsync(UserSession.CurrentUser.UserId);
+                UserOrders = new ObservableCollection<Order>(orders);
             }
             catch (Exception ex)
             {
@@ -64,30 +53,19 @@ namespace RestaurantOrderApp.ViewModels
         {
             if (parameter is Order order && order.Status == "Waiting")
             {
-                using (var db = new RestaurantDbContext())
+                try
                 {
-                    var dbOrder = await db.Orders
-                        .Include(o => o.OrderDetails)
-                        .FirstOrDefaultAsync(o => o.OrderId == order.OrderId);
-
-                    if (dbOrder != null)
+                    bool success = await _orderBll.CancelOrderAsync(order.OrderId);
+                    if (success)
                     {
-                        dbOrder.Status = "Cancelled";
-
-                        foreach (var detail in dbOrder.OrderDetails)
-                        {
-                            var product = await db.Products.FindAsync(detail.ProductId);
-                            if (product != null)
-                            {
-                                product.TotalQuantity += detail.Quantity;
-                            }
-                        }
-
-                        await db.SaveChangesAsync();
+                        MessageBox.Show("Order successfully canceled!");
+                        await LoadOrdersAsync();
                     }
                 }
-
-                await LoadOrdersAsync();
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Unsuccessful cancellation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
         }
     }
