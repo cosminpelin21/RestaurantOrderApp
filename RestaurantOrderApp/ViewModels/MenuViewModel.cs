@@ -19,29 +19,36 @@ namespace RestaurantOrderApp.ViewModels
         private readonly ProductBLL _productBll = new ProductBLL();
         private static readonly SemaphoreSlim _searchLock = new SemaphoreSlim(1, 1);
         private bool _isLoading;
+
         public bool IsLoading
         {
             get => _isLoading;
             set { _isLoading = value; OnPropertyChanged(); }
         }
+
         private string _statusMessage;
+
         public string StatusMessage
         {
             get => _statusMessage;
             set { _statusMessage = value; OnPropertyChanged(); }
         }
+
         private bool _showNotification;
+
         public bool ShowNotification
         {
             get => _showNotification;
             set { _showNotification = value; OnPropertyChanged(); }
         }
+
         public bool IsUserLoggedIn => RestaurantOrderApp.Helpers.UserSession.CurrentUser != null;
         private ObservableCollection<Product> _products;
         private ObservableCollection<Product> _cartItems = new ObservableCollection<Product>();
         private string _searchKeyword = "";
         public RelayCommand AddToCartCommand { get; }
         public RelayCommand OpenCartCommand { get; set; }
+
         public ObservableCollection<Product> Products
         {
             get => _products;
@@ -51,11 +58,13 @@ namespace RestaurantOrderApp.ViewModels
                 OnPropertyChanged();
             }
         }
+
         public ObservableCollection<Product> CartItems
         {
             get => _cartItems ?? (_cartItems = new ObservableCollection<Product>());
             set { _cartItems = value; OnPropertyChanged(); }
         }
+
         public string SearchKeyword
         {
             get => _searchKeyword;
@@ -67,13 +76,17 @@ namespace RestaurantOrderApp.ViewModels
                 _ = ExecuteSearchAsync();
             }
         }
+
         private ObservableCollection<Category> _categories;
+
         public ObservableCollection<Category> Categories
         {
             get => _categories;
             set { _categories = value; OnPropertyChanged(); }
         }
+
         private Category _selectedCategory;
+
         public Category SelectedCategory
         {
             get => _selectedCategory;
@@ -85,7 +98,9 @@ namespace RestaurantOrderApp.ViewModels
                 _ = ExecuteSearchAsync();
             }
         }
+
         private ObservableCollection<Allergen> _allergensList;
+
         public ObservableCollection<Allergen> AllergensList
         {
             get => _allergensList;
@@ -93,6 +108,19 @@ namespace RestaurantOrderApp.ViewModels
         }
 
         private Allergen _selectedSearchAllergen;
+
+        public Allergen _selectedSearchAllergenProperty
+        {
+            get => _selectedSearchAllergen;
+            set
+            {
+                if (_selectedSearchAllergen == value) return;
+                _selectedSearchAllergen = value;
+                OnPropertyChanged();
+                _ = ExecuteSearchAsync();
+            }
+        }
+
         public Allergen SelectedSearchAllergen
         {
             get => _selectedSearchAllergen;
@@ -106,6 +134,7 @@ namespace RestaurantOrderApp.ViewModels
         }
 
         private bool _excludeAllergen = true;
+
         public bool ExcludeAllergen
         {
             get => _excludeAllergen;
@@ -119,6 +148,7 @@ namespace RestaurantOrderApp.ViewModels
         }
 
         public RelayCommand ClearAllergenFilterCommand { get; }
+
         public MenuViewModel()
         {
             Products = new ObservableCollection<Product>();
@@ -143,7 +173,6 @@ namespace RestaurantOrderApp.ViewModels
                     ShowNotification = true;
                     await Task.Delay(2000);
                     ShowNotification = false;
-
                 }
             });
             OpenCartCommand = new RelayCommand(async p =>
@@ -151,9 +180,7 @@ namespace RestaurantOrderApp.ViewModels
                 try
                 {
                     var cartWin = new CartView(CartItems);
-
                     cartWin.ShowDialog();
-
                     await ExecuteSearchAsync();
                 }
                 catch (Exception ex)
@@ -165,18 +192,19 @@ namespace RestaurantOrderApp.ViewModels
             ClearAllergenFilterCommand = new RelayCommand(p => SelectedSearchAllergen = null);
             LoadCategoriesAsync();
         }
+
         public async Task InitializeAsync()
         {
             await LoadCategoriesAsync();
             await LoadAllergensAsync();
             await ExecuteSearchAsync();
         }
+
         private async Task LoadAllergensAsync()
         {
             try
             {
                 var allergens = await _productBll.GetAllAllergensAsync();
-
                 AllergensList = new ObservableCollection<Allergen>(allergens);
             }
             catch (Exception ex)
@@ -205,7 +233,6 @@ namespace RestaurantOrderApp.ViewModels
             try
             {
                 IsLoading = true;
-
                 var allItems = await _productBll.GetAssembledMenuAsync();
 
                 if (SelectedCategory != null)
@@ -251,6 +278,7 @@ namespace RestaurantOrderApp.ViewModels
                 _searchLock.Release();
             }
         }
+
         public void RefreshLoginStatus()
         {
             OnPropertyChanged(nameof(IsUserLoggedIn));

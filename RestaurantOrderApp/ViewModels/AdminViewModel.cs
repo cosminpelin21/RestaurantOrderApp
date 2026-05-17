@@ -59,7 +59,7 @@ namespace RestaurantOrderApp.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Eroare la încărcarea panoului de administrare: " + ex.Message, "Error");
+                MessageBox.Show("Error loading admin panel: " + ex.Message, "Error");
             }
         }
 

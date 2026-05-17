@@ -19,6 +19,7 @@ namespace RestaurantOrderApp.ViewModels
         public ObservableCollection<Category> Categories { get; set; } = new ObservableCollection<Category>();
 
         private Product _selectedProduct;
+
         public Product SelectedProduct
         {
             get => _selectedProduct;
@@ -32,17 +33,21 @@ namespace RestaurantOrderApp.ViewModels
         private Category _pCategory; public Category PCategory { get => _pCategory; set { _pCategory = value; OnPropertyChanged(); } }
 
         private string _pIngredients;
+
         public string PIngredients
         {
             get => _pIngredients;
             set { _pIngredients = value; OnPropertyChanged(); }
         }
+
         private string _pImagePath;
+
         public string PImagePath
         {
-            get => _pImagePath;
+            get => _pIngredients;
             set { _pImagePath = value; OnPropertyChanged(); }
         }
+
         private string _newCategoryName;
         public string NewCategoryName { get => _newCategoryName; set { _newCategoryName = value; OnPropertyChanged(); } }
 
@@ -142,7 +147,7 @@ namespace RestaurantOrderApp.ViewModels
 
         private async Task ExecuteDeleteProduct()
         {
-            if (SelectedProduct == null) 
+            if (SelectedProduct == null)
                 return;
             try
             {
@@ -176,7 +181,7 @@ namespace RestaurantOrderApp.ViewModels
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Eroare la adăugarea categoriei: {ex.Message}", "Avertisment",
+                System.Windows.MessageBox.Show($"Error adding category: {ex.Message}", "Warning",
                     System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
             }
         }
@@ -192,7 +197,7 @@ namespace RestaurantOrderApp.ViewModels
             {
                 await _productBll.DeleteCategoryAsync(cat.CategoryId);
 
-                MessageBox.Show("Categoria a fost ștearsă cu succes!", "Succes",
+                MessageBox.Show("The category has been successfully deleted!", "Succes",
                     MessageBoxButton.OK, MessageBoxImage.Information);
 
                 await InitializeAsync();

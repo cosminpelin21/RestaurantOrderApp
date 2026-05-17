@@ -3,6 +3,7 @@ using RestaurantOrderApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static RestaurantOrderApp.ViewModels.ReportsViewModel;
 
 namespace RestaurantOrderApp.Layers.DataAccessLayer
@@ -50,16 +51,52 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
             }
         }
 
-        public List<Order> GetOrdersByUserId(int userId)
+        public async Task<List<Order>> GetOrdersByUserIdAsync(int userId)
         {
             using (var db = new RestaurantDbContext())
             {
-                return db.Orders
+                return await db.Orders
                     .Where(o => o.UserId == userId)
                     .Include(o => o.OrderDetails)
                         .ThenInclude(od => od.Product)
                     .OrderByDescending(o => o.OrderDate)
-                    .ToList();
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<Order> GetOrderByIdAsync(int orderId)
+        {
+            using (var db = new RestaurantDbContext())
+            {
+                return await db.Orders
+                    .Include(o => o.OrderDetails)
+                    .FirstOrDefaultAsync(o => o.OrderId == orderId);
+            }
+        }
+
+        public async Task ExecuteCancelAndRestoreStockAsync(int orderId)
+        {
+            using (var db = new RestaurantDbContext())
+            {
+                var dbOrder = await db.Orders
+                    .Include(o => o.OrderDetails)
+                    .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+                if (dbOrder != null)
+                {
+                    dbOrder.Status = "Cancelled";
+
+                    foreach (var detail in dbOrder.OrderDetails)
+                    {
+                        var product = await db.Products.FindAsync(detail.ProductId);
+                        if (product != null)
+                        {
+                            product.TotalQuantity += detail.Quantity;
+                        }
+                    }
+
+                    await db.SaveChangesAsync();
+                }
             }
         }
 
@@ -75,6 +112,7 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
                 }
             }
         }
+
         public async Task<List<Order>> GetAllOrdersWithDetailsAsync()
         {
             using (var db = new RestaurantDbContext())
@@ -87,29 +125,7 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
                     .ToListAsync();
             }
         }
-        public async Task CancelOrderAndRestoreStockAsync(int orderId)
-        {
-            using (var db = new RestaurantDbContext())
-            {
-                var dbOrder = await db.Orders
-                    .Include(o => o.OrderDetails)
-                    .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
-                if (dbOrder != null)
-                    dbOrder.Status = "Cancelled";
-
-                foreach (var detail in dbOrder.OrderDetails)
-                {
-                    var product = await db.Products.FindAsync(detail.ProductId);
-                    if (product != null)
-                    {
-                        product.TotalQuantity += detail.Quantity;
-                    }
-                    await db.SaveChangesAsync();
-                }
-
-            }
-        }
         public async Task<List<Product>> GetCriticalStockFromDbAsync(int threshold)
         {
             using (var db = new RestaurantDbContext())
@@ -119,6 +135,7 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
                     .ToListAsync();
             }
         }
+
         public async Task<List<ProductStats>> GetTopSellingProductsFromDbAsync()
         {
             var statsList = new List<ProductStats>();

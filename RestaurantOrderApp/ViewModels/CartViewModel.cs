@@ -21,6 +21,7 @@ namespace RestaurantOrderApp.ViewModels
         private decimal _discountAmount;
         private bool _isLoyalCustomer;
         private readonly OrderBLL _orderBll = new OrderBLL();
+
         public decimal DiscountAmount
         {
             get => _discountAmount;
@@ -50,7 +51,9 @@ namespace RestaurantOrderApp.ViewModels
             get => _totalCost;
             set { _totalCost = value; OnPropertyChanged(); }
         }
+
         private ObservableCollection<CartItem> _groupedItems;
+
         public ObservableCollection<CartItem> GroupedItems
         {
             get => _groupedItems;
@@ -90,11 +93,9 @@ namespace RestaurantOrderApp.ViewModels
             decimal w = decimal.Parse(ConfigurationManager.AppSettings["MinOrderForFreeDelivery"] ?? "200");
             decimal a = decimal.Parse(ConfigurationManager.AppSettings["StandardDeliveryFee"] ?? "15");
             decimal b = decimal.Parse(ConfigurationManager.AppSettings["ReducedDeliveryFee"] ?? "5");
-
             decimal y = decimal.Parse(ConfigurationManager.AppSettings["DiscountValueThreshold"] ?? "200");
 
             FoodCost = GroupedItems.Sum(i => i.TotalItemPrice);
-
             DeliveryCost = (FoodCost >= w) ? b : a;
 
             bool applyDiscount = false;
@@ -164,8 +165,6 @@ namespace RestaurantOrderApp.ViewModels
             try
             {
                 int currentUserId = UserSession.CurrentUser.UserId;
-
-                // Apelăm metoda centralizată din BLL pentru a crea comanda pe straturi
                 int newOrderId = _orderBll.CreateOrderFromCart(currentUserId, TotalCost, GroupedItems);
 
                 MessageBox.Show($"Order #{newOrderId} was successfully placed!\n" +
@@ -181,6 +180,7 @@ namespace RestaurantOrderApp.ViewModels
                 MessageBox.Show($"Error sending order: {ex.Message}");
             }
         }
+
         private async Task CheckCustomerLoyaltyAsync()
         {
             if (UserSession.CurrentUser == null) return;

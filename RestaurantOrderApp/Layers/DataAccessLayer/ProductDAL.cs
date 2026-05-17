@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrderApp.Models;
@@ -30,6 +31,7 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
                     .ToListAsync();
             }
         }
+
         public async Task<List<Product>> GetAllProductsWithCategoryAsync()
         {
             using (var db = new RestaurantDbContext())
@@ -38,26 +40,15 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
             }
         }
 
-        public async Task<List<Category>> GetAllCategoriesAsync()
+        public async Task<List<Product>> GetProductsBelowStockThresholdAsync(decimal threshold)
         {
             using (var db = new RestaurantDbContext())
             {
-                return await db.Categories.ToListAsync();
-            }
-        }
-        public async Task<List<Allergen>> GetAllAllergensAsync()
-        {
-            using (var db = new RestaurantDbContext())
-            {
-                return await db.Allergens.OrderBy(a => a.Name).ToListAsync();
-            }
-        }
-
-        public async Task<List<Category>> GetAllCategoriesOrderedAsync()
-        {
-            using (var db = new RestaurantDbContext())
-            {
-                return await db.Categories.OrderBy(c => c.Name).ToListAsync();
+                return await db.Products
+                    .Include(p => p.Category)
+                    .Where(p => p.TotalQuantity <= threshold)
+                    .OrderBy(p => p.TotalQuantity)
+                    .ToListAsync();
             }
         }
 
@@ -69,6 +60,7 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
                 await db.SaveChangesAsync();
             }
         }
+
         public async Task UpdateProductFieldsAsync(int productId, string name, decimal price, string portion, decimal stock, int categoryId, string ingredients, string imagePath)
         {
             using (var db = new RestaurantDbContext())
@@ -110,6 +102,23 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
                 }
             }
         }
+
+        public async Task<List<Category>> GetAllCategoriesAsync()
+        {
+            using (var db = new RestaurantDbContext())
+            {
+                return await db.Categories.ToListAsync();
+            }
+        }
+
+        public async Task<List<Category>> GetAllCategoriesOrderedAsync()
+        {
+            using (var db = new RestaurantDbContext())
+            {
+                return await db.Categories.OrderBy(c => c.Name).ToListAsync();
+            }
+        }
+
         public async Task AddCategoryAsync(Category category)
         {
             using (var db = new RestaurantDbContext())
@@ -118,6 +127,7 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
                 await db.SaveChangesAsync();
             }
         }
+
         public async Task<bool> CategoryHasProductsAsync(int categoryId)
         {
             using (var db = new RestaurantDbContext())
@@ -138,15 +148,12 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
                 }
             }
         }
-        public async Task<List<Product>> GetProductsBelowStockThresholdAsync(decimal threshold)
+
+        public async Task<List<Allergen>> GetAllAllergensAsync()
         {
             using (var db = new RestaurantDbContext())
             {
-                return await db.Products
-                    .Include(p => p.Category)
-                    .Where(p => p.TotalQuantity <= threshold)
-                    .OrderBy(p => p.TotalQuantity)
-                    .ToListAsync();
+                return await db.Allergens.OrderBy(a => a.Name).ToListAsync();
             }
         }
 
