@@ -31,7 +31,7 @@ namespace RestaurantOrderApp.Layers.BusinessLogicLayer
                 decimal finalPrice = totalPrice - (totalPrice * (discountPercent / 100m));
                 finalPrice = Math.Round(finalPrice, 2);
 
-                string ingredientsText = "Meniu promoțional format din: " + string.Join(", ", menu.Products.Select(p => p.Name));
+                string ingredientsText = "Promotional menu consisting of: " + string.Join(", ", menu.Products.Select(p => p.Name));
                 string portionsText = string.Join(" + ", menu.Products.Select(p => p.PortionQuantity));
 
                 var combinedAllergens = menu.Products

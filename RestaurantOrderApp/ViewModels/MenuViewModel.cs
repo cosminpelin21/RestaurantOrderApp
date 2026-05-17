@@ -109,18 +109,6 @@ namespace RestaurantOrderApp.ViewModels
 
         private Allergen _selectedSearchAllergen;
 
-        //public Allergen _selectedSearchAllergenProperty
-        //{
-        //    get => _selectedSearchAllergen;
-        //    set
-        //    {
-        //        if (_selectedSearchAllergen == value) return;
-        //        _selectedSearchAllergen = value;
-        //        OnPropertyChanged();
-        //        _ = ExecuteSearchAsync();
-        //    }
-        //}
-
         public Allergen SelectedSearchAllergen
         {
             get => _selectedSearchAllergen;
@@ -277,11 +265,6 @@ namespace RestaurantOrderApp.ViewModels
                 IsLoading = false;
                 _searchLock.Release();
             }
-        }
-
-        public void RefreshLoginStatus()
-        {
-            OnPropertyChanged(nameof(IsUserLoggedIn));
         }
     }
 }

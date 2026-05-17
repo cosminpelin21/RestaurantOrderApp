@@ -28,12 +28,6 @@ namespace RestaurantOrderApp.ViewModels
             set { _discountAmount = value; OnPropertyChanged(); }
         }
 
-        public ObservableCollection<Product> CartItems
-        {
-            get => _cartItems;
-            set { _cartItems = value; OnPropertyChanged(); CalculateTotals(); }
-        }
-
         public decimal FoodCost
         {
             get => _foodCost;
@@ -65,7 +59,6 @@ namespace RestaurantOrderApp.ViewModels
 
         public CartViewModel(ObservableCollection<Product> items)
         {
-            _cartItems = items;
             _sourceItems = items;
             var grouped = items.GroupBy(p => p.ProductId)
                               .Select(g => new CartItem
