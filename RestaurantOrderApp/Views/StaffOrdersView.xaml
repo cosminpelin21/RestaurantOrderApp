@@ -81,7 +81,7 @@
                                             <Style TargetType="Button">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Preparing">
+                                                    <DataTrigger Binding="{Binding Status}" Value="In preparation">
                                                         <Setter Property="Visibility" Value="Visible"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>

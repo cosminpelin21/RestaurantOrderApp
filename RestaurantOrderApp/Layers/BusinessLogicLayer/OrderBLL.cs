@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using static RestaurantOrderApp.ViewModels.ReportsViewModel;
 
 namespace RestaurantOrderApp.Layers.BusinessLogicLayer
 {
@@ -58,15 +57,12 @@ namespace RestaurantOrderApp.Layers.BusinessLogicLayer
             return await _orderDal.GetAllOrdersWithDetailsAsync();
         }
 
-        public async Task<List<Order>> GetStaffOrdersBoardAsync()
-        {
-            return await _orderDal.GetAllOrdersWithDetailsAsync();
-        }
-
         public async Task ChangeStatusAsync(int orderId, string newStatus)
         {
-            if (orderId <= 0) throw new ArgumentException("ID-ul comenzii este invalid.");
-            if (string.IsNullOrWhiteSpace(newStatus)) throw new ArgumentException("Statusul nu poate fi gol.");
+            if (orderId <= 0) 
+                throw new ArgumentException("The order ID is invalid.");
+            if (string.IsNullOrWhiteSpace(newStatus)) 
+                throw new ArgumentException("Status cannot be empty.");
 
             await _orderDal.UpdateOrderStatusAsync(orderId, newStatus);
         }
@@ -74,28 +70,17 @@ namespace RestaurantOrderApp.Layers.BusinessLogicLayer
         public async Task<bool> CancelOrderAsync(int orderId)
         {
             var dbOrder = await _orderDal.GetOrderByIdAsync(orderId);
-            if (dbOrder == null) return false;
+            if (dbOrder == null) 
+                return false;
 
             if (dbOrder.Status != "Waiting" && dbOrder.Status != "In asteptare")
             {
-                throw new Exception("Comanda nu mai poate fi anulată deoarece este deja în preparare sau livrată.");
+                throw new Exception("The order can no longer be canceled because it is already in preparation or delivered.");
             }
 
             await _orderDal.ExecuteCancelAndRestoreStockAsync(orderId);
             return true;
         }
 
-        public async Task<List<Product>> GetCriticalStockReportAsync(int threshold)
-        {
-            if (threshold < 0)
-                threshold = 0;
-
-            return await _orderDal.GetCriticalStockFromDbAsync(threshold);
-        }
-
-        public async Task<List<ProductStats>> GetTopSellingProductsStatsAsync()
-        {
-            return await _orderDal.GetTopSellingProductsFromDbAsync();
-        }
     }
 }

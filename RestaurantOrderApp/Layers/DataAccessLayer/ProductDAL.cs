@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using RestaurantOrderApp.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using RestaurantOrderApp.Models;
 
 namespace RestaurantOrderApp.Layers.DataAccessLayer
 {
@@ -44,10 +45,9 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
         {
             using (var db = new RestaurantDbContext())
             {
+                var thresholdParam = new SqlParameter("@Threshold", Convert.ToInt32(threshold));
                 return await db.Products
-                    .Include(p => p.Category)
-                    .Where(p => p.TotalQuantity <= threshold)
-                    .OrderBy(p => p.TotalQuantity)
+                    .FromSqlRaw("EXEC GetCriticalStock @Threshold", thresholdParam)
                     .ToListAsync();
             }
         }
@@ -56,8 +56,9 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
         {
             using (var db = new RestaurantDbContext())
             {
-                db.Products.Add(product);
-                await db.SaveChangesAsync();
+                await db.Database.ExecuteSqlRawAsync(
+                    "EXEC AddProduct @Name={0}, @CategoryID={1}, @Price={2}, @TotalQuantity={3}, @PortionQuantity={4}, @Ingredients={5}",
+                    product.Name, product.CategoryId, product.Price, product.TotalQuantity, product.PortionQuantity, product.Ingredients);
             }
         }
 
@@ -65,28 +66,9 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
         {
             using (var db = new RestaurantDbContext())
             {
-                var p = await db.Products.FindAsync(productId);
-                if (p != null)
-                {
-                    p.Name = name;
-                    p.Price = price;
-                    p.PortionQuantity = portion;
-                    p.TotalQuantity = stock;
-                    p.CategoryId = categoryId;
-                    p.Ingredients = ingredients;
-                    p.ImagePath = imagePath;
-
-                    await db.SaveChangesAsync();
-                }
-            }
-        }
-
-        public async Task UpdateProductAsync(Product product)
-        {
-            using (var db = new RestaurantDbContext())
-            {
-                db.Entry(product).State = EntityState.Modified;
-                await db.SaveChangesAsync();
+                await db.Database.ExecuteSqlRawAsync(
+             "EXEC UpdateProductDetails @ProductID={0}, @Name={1}, @Price={2}, @PortionQuantity={3}, @TotalQuantity={4}, @CategoryID={5}, @Ingredients={6}, @ImagePath={7}",
+             productId, name, price, portion, stock, categoryId, ingredients, imagePath);
             }
         }
 
@@ -94,12 +76,7 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
         {
             using (var db = new RestaurantDbContext())
             {
-                var product = await db.Products.FindAsync(productId);
-                if (product != null)
-                {
-                    db.Products.Remove(product);
-                    await db.SaveChangesAsync();
-                }
+                await db.Database.ExecuteSqlRawAsync("EXEC DeleteProduct @ProductId={0}", productId);
             }
         }
 
@@ -140,12 +117,7 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
         {
             using (var db = new RestaurantDbContext())
             {
-                var category = await db.Categories.FindAsync(categoryId);
-                if (category != null)
-                {
-                    db.Categories.Remove(category);
-                    await db.SaveChangesAsync();
-                }
+                await db.Database.ExecuteSqlRawAsync("EXEC DeleteCategory @CategoryID={0}", categoryId);
             }
         }
 
@@ -154,39 +126,6 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
             using (var db = new RestaurantDbContext())
             {
                 return await db.Allergens.OrderBy(a => a.Name).ToListAsync();
-            }
-        }
-
-        public List<Product> GetAllProductsWithCategory()
-        {
-            using (var db = new RestaurantDbContext())
-            {
-                return db.Products.Include(p => p.Category).ToList();
-            }
-        }
-
-        public List<Category> GetAllCategories()
-        {
-            using (var db = new RestaurantDbContext())
-            {
-                return db.Categories.ToList();
-            }
-        }
-
-        public void AddProductViaSp(string name, decimal price, string portionQuantity, decimal totalQuantity, int categoryId, string imagePath)
-        {
-            using (var db = new RestaurantDbContext())
-            {
-                db.Database.ExecuteSqlRaw("EXEC AddProduct @Name={0}, @Price={1}, @PortionQuantity={2}, @TotalQuantity={3}, @CategoryId={4}, @ImagePath={5}",
-                    name, price, portionQuantity, totalQuantity, categoryId, imagePath);
-            }
-        }
-
-        public void DeleteProductViaSp(int productId)
-        {
-            using (var db = new RestaurantDbContext())
-            {
-                db.Database.ExecuteSqlRaw("EXEC DeleteProduct @ProductId={0}", productId);
             }
         }
     }

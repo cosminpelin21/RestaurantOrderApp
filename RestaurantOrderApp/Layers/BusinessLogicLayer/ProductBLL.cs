@@ -148,33 +148,5 @@ namespace RestaurantOrderApp.Layers.BusinessLogicLayer
         {
             return await _productDal.GetAllAllergensAsync();
         }
-
-        public List<Product> GetProductsForAdmin()
-        {
-            return _productDal.GetAllProductsWithCategory();
-        }
-
-        public List<Category> GetCategoriesForAdmin()
-        {
-            return _productDal.GetAllCategories();
-        }
-
-        public void CreateProductFromAdmin(string name, decimal price, string portionQuantity, decimal totalQuantity, int categoryId, string imagePath)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new Exception("The name of the new product is mandatory.");
-            if (price < 0)
-                throw new Exception("The price cannot be a negative number.");
-
-            _productDal.AddProductViaSp(name, price, portionQuantity, totalQuantity, categoryId, imagePath);
-        }
-
-        public void RemoveProductFromAdmin(int productId)
-        {
-            if (productId <= 0)
-                throw new Exception("The selected product ID is invalid.");
-
-            _productDal.DeleteProductViaSp(productId);
-        }
     }
 }

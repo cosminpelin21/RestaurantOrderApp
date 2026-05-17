@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static RestaurantOrderApp.ViewModels.ReportsViewModel;
 
 namespace RestaurantOrderApp.Layers.DataAccessLayer
 {
@@ -104,12 +103,9 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
         {
             using (var db = new RestaurantDbContext())
             {
-                var order = await db.Orders.FindAsync(orderId);
-                if (order != null)
-                {
-                    order.Status = newStatus;
-                    await db.SaveChangesAsync();
-                }
+                await db.Database.ExecuteSqlRawAsync(
+                    "EXEC UpdateOrderStatus @OrderID={0}, @NewStatus={1}",
+                    orderId, newStatus);
             }
         }
 
@@ -126,45 +122,5 @@ namespace RestaurantOrderApp.Layers.DataAccessLayer
             }
         }
 
-        public async Task<List<Product>> GetCriticalStockFromDbAsync(int threshold)
-        {
-            using (var db = new RestaurantDbContext())
-            {
-                return await db.Products
-                    .FromSqlRaw("EXEC GetCriticalStock @Threshold = {0}", threshold)
-                    .ToListAsync();
-            }
-        }
-
-        public async Task<List<ProductStats>> GetTopSellingProductsFromDbAsync()
-        {
-            var statsList = new List<ProductStats>();
-
-            using (var db = new RestaurantDbContext())
-            {
-                var conn = db.Database.GetDbConnection();
-                await conn.OpenAsync();
-
-                using (var command = conn.CreateCommand())
-                {
-                    command.CommandText = "EXEC GetTopSellingProducts";
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            statsList.Add(new ProductStats
-                            {
-                                Name = reader.GetString(0),
-                                TotalSold = reader.GetInt32(1),
-                                TotalRevenue = reader.GetDecimal(2)
-                            });
-                        }
-                    }
-                }
-            }
-
-            return statsList;
-        }
     }
 }

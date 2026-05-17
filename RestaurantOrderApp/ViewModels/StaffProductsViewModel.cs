@@ -26,11 +26,36 @@ namespace RestaurantOrderApp.ViewModels
             set { _selectedProduct = value; OnPropertyChanged(); FillProductForm(); }
         }
 
-        private string _pName; public string PName { get => _pName; set { _pName = value; OnPropertyChanged(); } }
-        private decimal _pPrice; public decimal PPrice { get => _pPrice; set { _pPrice = value; OnPropertyChanged(); } }
-        private string _pPortion; public string PPortion { get => _pPortion; set { _pPortion = value; OnPropertyChanged(); } }
-        private decimal _pStock; public decimal PStock { get => _pStock; set { _pStock = value; OnPropertyChanged(); } }
-        private Category _pCategory; public Category PCategory { get => _pCategory; set { _pCategory = value; OnPropertyChanged(); } }
+        private string _pName;
+        public string PName 
+        {
+            get => _pName;
+            set { _pName = value; OnPropertyChanged(); }
+        }
+        private decimal _pPrice;
+        public decimal PPrice 
+        {
+            get => _pPrice;
+            set { _pPrice = value; OnPropertyChanged(); }
+        }
+        private string _pPortion;
+        public string PPortion 
+        { 
+            get => _pPortion; 
+            set { _pPortion = value; OnPropertyChanged(); }
+        }
+        private decimal _pStock;
+        public decimal PStock 
+        { 
+            get => _pStock; 
+            set { _pStock = value; OnPropertyChanged(); }
+        }
+        private Category _pCategory;
+        public Category PCategory 
+        { 
+            get => _pCategory;
+            set { _pCategory = value; OnPropertyChanged(); }
+        }
 
         private string _pIngredients;
 
@@ -49,7 +74,11 @@ namespace RestaurantOrderApp.ViewModels
         }
 
         private string _newCategoryName;
-        public string NewCategoryName { get => _newCategoryName; set { _newCategoryName = value; OnPropertyChanged(); } }
+        public string NewCategoryName 
+        { 
+            get => _newCategoryName; 
+            set { _newCategoryName = value; OnPropertyChanged(); }
+        }
 
         public RelayCommand NewProductModeCommand { get; }
         public RelayCommand SaveProductCommand { get; }
@@ -59,7 +88,8 @@ namespace RestaurantOrderApp.ViewModels
 
         public StaffProductsViewModel()
         {
-            NewProductModeCommand = new RelayCommand(_ => {
+            NewProductModeCommand = new RelayCommand(_ =>
+            {
                 SelectedProduct = null;
                 PName = "";
                 PPrice = 0;
@@ -99,7 +129,8 @@ namespace RestaurantOrderApp.ViewModels
 
         private void FillProductForm()
         {
-            if (SelectedProduct == null) return;
+            if (SelectedProduct == null)
+                return;
             PName = SelectedProduct.Name;
             PPrice = SelectedProduct.Price;
             PPortion = SelectedProduct.PortionQuantity;
@@ -141,7 +172,7 @@ namespace RestaurantOrderApp.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving product: {ex.Message}", "Avertisment", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Error saving product: {ex.Message}", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -173,7 +204,7 @@ namespace RestaurantOrderApp.ViewModels
             {
                 await _productBll.AddCategoryAsync(NewCategoryName);
 
-                System.Windows.MessageBox.Show("Categoria a fost adăugată cu succes!", "Succes",
+                System.Windows.MessageBox.Show("The category has been successfully added!", "Success",
                     System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
 
                 NewCategoryName = "";
@@ -197,7 +228,7 @@ namespace RestaurantOrderApp.ViewModels
             {
                 await _productBll.DeleteCategoryAsync(cat.CategoryId);
 
-                MessageBox.Show("The category has been successfully deleted!", "Succes",
+                MessageBox.Show("The category has been successfully deleted!", "Success",
                     MessageBoxButton.OK, MessageBoxImage.Information);
 
                 await InitializeAsync();

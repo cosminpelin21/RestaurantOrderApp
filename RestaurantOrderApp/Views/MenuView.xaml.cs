@@ -42,27 +42,27 @@ namespace RestaurantOrderApp.Views
             startWin.Show();
             this.Close();
         }
-        private void OpenLogin_Click(object sender, RoutedEventArgs e)
-        {
-            var oldWindows = Application.Current.Windows.OfType<Window>()
-                .Where(w => w is RestaurantOrderApp.Views.MenuView || w is RestaurantOrderApp.Views.CartView)
-                .ToList();
-            var loginWin = new LoginWindow();
-            loginWin.WindowStyle = WindowStyle.None;
-            loginWin.WindowState = WindowState.Maximized;
-            loginWin.ShowDialog();
-            if (this.DataContext is MenuViewModel vm)
-            {
-                vm.RefreshLoginStatus();
-            }
-            if (RestaurantOrderApp.Helpers.UserSession.CurrentUser != null)
-            {
-                foreach (var window in oldWindows)
-                {
-                    window.Close();
-                }
-            }
-        }
+        //private void OpenLogin_Click(object sender, RoutedEventArgs e)
+        //{
+        //    var oldWindows = Application.Current.Windows.OfType<Window>()
+        //        .Where(w => w is RestaurantOrderApp.Views.MenuView || w is RestaurantOrderApp.Views.CartView)
+        //        .ToList();
+        //    var loginWin = new LoginWindow();
+        //    loginWin.WindowStyle = WindowStyle.None;
+        //    loginWin.WindowState = WindowState.Maximized;
+        //    loginWin.ShowDialog();
+        //    if (this.DataContext is MenuViewModel vm)
+        //    {
+        //        vm.RefreshLoginStatus();
+        //    }
+        //    if (RestaurantOrderApp.Helpers.UserSession.CurrentUser != null)
+        //    {
+        //        foreach (var window in oldWindows)
+        //        {
+        //            window.Close();
+        //        }
+        //    }
+        //}
         private void OpenOrders_Click(object sender, RoutedEventArgs e)
         {
             var historyWin = new MyOrderView();

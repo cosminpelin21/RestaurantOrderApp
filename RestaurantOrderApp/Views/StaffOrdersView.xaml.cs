@@ -21,11 +21,6 @@ namespace RestaurantOrderApp.Views
             InitializeComponent();
             this.DataContext = new ViewModels.StaffOrdersViewModel();
         }
-        private void OpenReports_Click(object sender, RoutedEventArgs e)
-        {
-            var reportsWin = new ReportsView();
-            reportsWin.Show();
-        }
         private void OpenStaffMenu_Click(object sender, RoutedEventArgs e)
         {
             new StaffProductsView().Show();

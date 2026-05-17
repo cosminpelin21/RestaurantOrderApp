@@ -20,9 +20,6 @@
     <Compile Update="Views\MyOrderView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\ReportsView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="Views\RegisterView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
