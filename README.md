@@ -1,6 +1,6 @@
 # RestaurantOrderApp
 
-A modern desktop application developed in WPF (Windows Presentation Foundation) using the **MVVM** (Model-View-ViewModel) pattern to manage the order flow within a restaurant.
+A modern desktop application developed in WPF using the MVVM pattern, structured on a multi-layered architecture (Data Access Layer and Business Logic Layer) to ensure clean separation of concerns in managing a restaurant's order flow.
 
 ## 🚀 Key Features
 
