@@ -69,7 +69,7 @@ namespace RestaurantOrderApp.ViewModels
 
         public string PImagePath
         {
-            get => _pIngredients;
+            get => _pImagePath;
             set { _pImagePath = value; OnPropertyChanged(); }
         }
 

@@ -40,7 +40,7 @@ namespace RestaurantOrderApp.Layers.BusinessLogicLayer
                     .Select(g => g.First())
                     .ToList();
 
-                string imagePath = menu.Products.FirstOrDefault(p => !string.IsNullOrEmpty(p.ImagePath))?.ImagePath ?? "/Images/default-menu.jpg";
+                string imagePath = "pack://application:,,,/Images/no-image-available.jpg";
                 decimal availableStock = menu.Products.Any() ? menu.Products.Min(p => p.TotalQuantity) : 0;
 
                 var menuAsProduct = new Product

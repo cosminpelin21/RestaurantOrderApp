@@ -85,7 +85,7 @@ namespace RestaurantOrderApp.ViewModels
             decimal x = decimal.Parse(ConfigurationManager.AppSettings["DiscountPercent"] ?? "10");
             decimal w = decimal.Parse(ConfigurationManager.AppSettings["MinOrderForFreeDelivery"] ?? "200");
             decimal a = decimal.Parse(ConfigurationManager.AppSettings["StandardDeliveryFee"] ?? "15");
-            decimal b = decimal.Parse(ConfigurationManager.AppSettings["ReducedDeliveryFee"] ?? "5");
+            decimal b = decimal.Parse(ConfigurationManager.AppSettings["ReducedDeliveryFee"] ?? "0");
             decimal y = decimal.Parse(ConfigurationManager.AppSettings["DiscountValueThreshold"] ?? "200");
 
             FoodCost = GroupedItems.Sum(i => i.TotalItemPrice);

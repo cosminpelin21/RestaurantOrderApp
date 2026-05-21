@@ -15,9 +15,16 @@
     <None Remove="Images\ciorba-zilei.jpeg" />
     <None Remove="Images\humus-cu-alune-si-crutoane-din-muschi-de-vita.jpg" />
     <None Remove="Images\mic-dejun-fitness.jpg" />
+    <None Remove="Images\no-image-available.jpg" />
     <None Remove="Images\supa-mediteraneana_0.jpeg" />
     <None Remove="Images\tartar-de-ton-cu-sfecla-rosiecrema-de-avocado-sos-allioli.jpeg" />
     <None Remove="Images\tigaie-cu-ou-prajit-si-bacon-cartofi-baby-spanac-si-rosii-cherry.jpeg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\no-image-available.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
