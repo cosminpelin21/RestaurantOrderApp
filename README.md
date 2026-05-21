@@ -49,9 +49,18 @@ A modern desktop application developed in WPF using the MVVM pattern, structured
 
 * **Cosmin Pelin**
 
-## Screenshots
+## 📷 Screenshots
 ![Start Window](images/StartWindow.png)
 ![Register](images/Register.png)
 ![Menu](images/Menu.png)
 ![Staff Window](images/StaffWindow.png)
 ![Staff Management](images/StaffManagement.png)
+
+## 🐛 Feedback & Bug Reports
+
+While I have thoroughly tested the application, I am sure there is always room for improvement.
+
+If you encounter any bugs, have suggestions for new features, or spot any issues, **I would greatly appreciate your feedback!** You can contribute by: **contacting me directly** at *cosminpelin21@gmail.com*.
+
+Your experience and insights are extremely valuable to me as I continue to learn and improve my development skills. Thank you!
+
