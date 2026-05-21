@@ -50,8 +50,8 @@ A modern desktop application developed in WPF using the MVVM pattern, structured
 * **Cosmin Pelin**
 
 ## Screenshots
-![Start Window](images/Menu.png)
+![Start Window](images/StartWindow.png)
 ![Register](images/Register.png)
 ![Menu](images/Menu.png)
-![Staff Window](images/StaffWindow)
-![Staff Management](images/StaffManagement)
+![Staff Window](images/StaffWindow.png)
+![Staff Management](images/StaffManagement.png)
